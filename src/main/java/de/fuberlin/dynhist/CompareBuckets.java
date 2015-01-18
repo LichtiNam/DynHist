@@ -9,8 +9,8 @@ import java.util.Comparator;
  */
 public class CompareBuckets implements Comparator<Bucket> {
 
-  public int compare(Bucket o, Bucket t1) {
-    if (o.getLeftBorder() > t1.getLeftBorder()) {
+  public int compare(Bucket bucket1, Bucket bucket2) {
+    if (bucket1.getLeftBorder() > bucket2.getLeftBorder()) {
       return 1;
     }
     return -1;
