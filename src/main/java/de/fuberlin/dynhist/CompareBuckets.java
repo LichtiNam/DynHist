@@ -1,7 +1,18 @@
 package de.fuberlin.dynhist;
 
+import java.util.Comparator;
+
 /**
- * Created by lichtbringer on 18.01.15.
+ * @author Martin Görick
+ *
+ * Comparator class to sort the buckets by leftBorder.
  */
-public class CompareBuckets {
+public class CompareBuckets implements Comparator<Bucket> {
+
+  public int compare(Bucket o, Bucket t1) {
+    if (o.getLeftBorder() > t1.getLeftBorder()) {
+      return 1;
+    }
+    return -1;
+  }
 }
