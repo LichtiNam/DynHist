@@ -17,7 +17,7 @@ public class CompressedHistogram implements Histogram {
   private String histFile = "histogram.dat";
   private boolean sorted = false;
   private double maxInput = 0;
-  private double lbound = 0.2;                // lower bound for chiSquare check
+  private double lbound = 0.1;                // lower bound for chiSquare check
   private double average = 0;                 // maxInput / buckets
 
   /**
@@ -28,32 +28,33 @@ public class CompressedHistogram implements Histogram {
     if (parameter.length > 0) {
       File file = new File(parameter[0]);
       if (file.exists()) {
-        this.histFile = parameter[0];
+        histFile = parameter[0];
       }
     }
     if (readFile) {
       initHistogram();
     } else {
       this.buckets = buckets;
-      this.histogram = new ArrayList<Bucket>();
+      histogram = new ArrayList<Bucket>();
     }
+    lbound = 1.0 / this.buckets;
   }
 
   private void initHistogram() {
-    this.histogram = FileOperations.readHistogram(this.histFile);
-    this.buckets = this.histogram.size();
-    for (Bucket bucket : this.histogram) {
+    histogram = FileOperations.readHistogram(histFile);
+    buckets = histogram.size();
+    for (Bucket bucket : histogram) {
       maxInput += bucket.getCount();
     }
-    this.average = maxInput / buckets;
-    this.sorted = true;
+    average = maxInput / buckets;
+    sorted = true;
   }
 
   /**
    * Write histogram to file with function of ComHistUtil class.
    */
   public void writeHist() {
-    FileOperations.writeHistogram(this.histogram, this.histFile);
+    FileOperations.writeHistogram(histogram, histFile);
   }
 
   /**
@@ -69,50 +70,50 @@ public class CompressedHistogram implements Histogram {
    * @param input a double value
    */
   public void addInput(double input) {
-    this.maxInput++;
-    this.average = this.maxInput / this.buckets;
-    int histSize = this.histogram.size();
-    if (histSize < this.buckets) {
-      for (Bucket bucket : this.histogram) {
+    maxInput++;
+    average = maxInput / buckets;
+    int histSize = histogram.size();
+    if (histSize < buckets) {
+      for (Bucket bucket : histogram) {
         if (bucket.getLeftBorder() == input) {
           bucket.incCount();
           return;
         }
       }
       Bucket bucket = new Bucket(input);
-      this.histogram.add(bucket);
+      histogram.add(bucket);
       return;
     }
     if (!sorted) {
       CompareBuckets cb = new CompareBuckets();
-      Collections.sort(this.histogram, cb);
+      Collections.sort(histogram, cb);
     }
-    if ( this.histogram.size() == buckets) {
+    if ( histogram.size() == buckets) {
       // sort list of buckets
-      if (!this.sorted) {
+      if (!sorted) {
         CompareBuckets cb = new CompareBuckets();
-        Collections.sort(this.histogram, cb);
-        this.sorted = true;
+        Collections.sort(histogram, cb);
+        sorted = true;
       }
-      for (int idx = 0; idx < this.buckets; idx++) {
-        if (this.histogram.get(idx).getLeftBorder() > input) {
+      for (int idx = 0; idx < buckets; idx++) {
+        if (histogram.get(idx).getLeftBorder() > input) {
           if (idx == 0) {
-            this.histogram.get(0).incCount();
-            this.histogram.get(0).setLeftBorder(input);
+            histogram.get(0).incCount();
+            histogram.get(0).setLeftBorder(input);
             break;
           } else {
-            this.histogram.get(idx - 1).incCount();
+            histogram.get(idx - 1).incCount();
             break;
           }
         }
-        if (idx == this.buckets - 1 && this.histogram.get(idx).getLeftBorder() <= input) {
-          this.histogram.get(idx).incCount();
+        if (idx == buckets - 1 && histogram.get(idx).getLeftBorder() <= input) {
+          histogram.get(idx).incCount();
         }
       }
-      this.average = this.maxInput / this.buckets;
-
+      average = maxInput / buckets;
+      
       // check chiSquare if true then repartition histogram
-      if (chiSquare() > this.lbound) {
+      if (chiSquare() > lbound) {
         repartition();
       }
     }
@@ -120,29 +121,29 @@ public class CompressedHistogram implements Histogram {
 
   private double chiSquare() {
     double chi = 0;
-    for (Bucket bucket : this.histogram) {
-      chi += ((bucket.getCount() - this.average) * (bucket.getCount() - this.average))
-          / this.average;
+    for (Bucket bucket : histogram) {
+      chi += ((bucket.getCount() - average) * (bucket.getCount() - average))
+          / average;
     }
     return chi;
   }
 
   private void repartition() {
-    double currentBorder = this.histogram.get(0).getLeftBorder();
-    int intAverage = (int) this.average;
+    double currentBorder = histogram.get(0).getLeftBorder();
+    int intAverage = (int) average;
     double nextBorder;
     double range;
     double newRightBorder;
     for (int idx = 0; idx < buckets - 1; idx++) {
-      nextBorder = this.histogram.get(idx + 1).getLeftBorder();
+      nextBorder = histogram.get(idx + 1).getLeftBorder();
       range = nextBorder - currentBorder;
-      newRightBorder = (range / this.histogram.get(idx).getCount()) * intAverage;
-      currentBorder = this.histogram.get(idx + 1).getLeftBorder();
-      this.histogram.get(idx + 1).setLeftBorder(this.histogram.get(idx).getLeftBorder()
+      newRightBorder = (range / histogram.get(idx).getCount()) * intAverage;
+      currentBorder = histogram.get(idx + 1).getLeftBorder();
+      histogram.get(idx + 1).setLeftBorder(histogram.get(idx).getLeftBorder()
           + newRightBorder);
-      this.histogram.get(idx).setCount(intAverage);
+      histogram.get(idx).setCount(intAverage);
     }
-    this.histogram.get(this.buckets - 1).setCount((int) this.maxInput
-        - (intAverage * (this.buckets - 1)));
+    histogram.get(buckets - 1).setCount((int) maxInput
+        - (intAverage * (buckets - 1)));
   }
 }

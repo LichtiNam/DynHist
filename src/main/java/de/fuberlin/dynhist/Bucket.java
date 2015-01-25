@@ -19,11 +19,11 @@ public class Bucket implements Serializable {
   }
 
   public void incCount() {
-    this.count++;
+    count++;
   }
 
   public int getCount() {
-    return this.count;
+    return count;
   }
 
   public void setCount(int count) {
@@ -31,7 +31,7 @@ public class Bucket implements Serializable {
   }
 
   public double getLeftBorder() {
-    return this.leftBorder;
+    return leftBorder;
   }
 
   /**
