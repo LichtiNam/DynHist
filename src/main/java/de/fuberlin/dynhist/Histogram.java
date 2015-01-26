@@ -1,5 +1,7 @@
 package de.fuberlin.dynhist;
 
+import java.util.List;
+
 /**
  * @author Martin Görick
  *
@@ -14,12 +16,24 @@ public interface Histogram {
   public void addInput(double input);
 
   /**
-   * Returns the histogram. Have to be cast.
+   * Returns the list of buckets as histogram.
    */
-  public Object getHistogram();
+  public List<Bucket> getHistogram();
 
   /**
-   * write histogram if to file if buckets serializable
+   * Write histogram if to filePath.
+   * @param filePath
    */
-  public void writeHist();
+  public void writeHistogram(String filePath);
+
+  /**
+   * Read histogram from filePath.
+   * @param filePath
+   */
+  public void readHistogram(String filePath);
+
+  /**
+   * Returns the number of buckets.
+   */
+  public int getBuckets();
 }

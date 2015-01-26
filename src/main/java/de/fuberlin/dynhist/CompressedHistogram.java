@@ -1,6 +1,5 @@
 package de.fuberlin.dynhist;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,49 +11,57 @@ import java.util.List;
  */
 public class CompressedHistogram implements Histogram {
 
-  private int buckets = 50;                   // default #buckets
+  private int buckets;
   private List<Bucket> histogram;
-  private String histFile = "histogram.dat";
   private boolean sorted = false;
   private double maxInput = 0;
-  private double lbound = 0.1;                // lower bound for chiSquare check
-  private double average = 0;                 // maxInput / buckets
+  private double lowerBound;      // lower bound for chiSquare check, 1.0 / # buckets
+  private double average = 0;     // maxInput / buckets
+
+  private CompareBuckets cb;
 
   /**
    * Contractor of DynComHist use buckets of readFile is false
    * histFile use the first String parameter, parameter can be empty then default is used.
    */
-  public CompressedHistogram(int buckets, boolean readFile, String ... parameter) {
-    if (parameter.length > 0) {
-      File file = new File(parameter[0]);
-      if (file.exists()) {
-        histFile = parameter[0];
-      }
-    }
-    if (readFile) {
-      initHistogram();
-    } else {
-      this.buckets = buckets;
-      histogram = new ArrayList<Bucket>();
-    }
-    lbound = 1.0 / this.buckets;
+  public CompressedHistogram(int buckets) {
+    this.buckets = buckets;
+    cb = new CompareBuckets();
+    histogram = new ArrayList<>();
+    lowerBound = 1.0 / this.buckets;
   }
 
-  private void initHistogram() {
-    histogram = FileOperations.readHistogram(histFile);
+  /**
+   * Returns number of buckets
+   */
+  public int getBuckets() {
+    return buckets;
+  }
+
+  /**
+   * Read histogram from filePath
+   * @param filePath
+   */
+  public void readHistogram(String filePath) {
+    initHistogram(filePath);
+  }
+
+  private void initHistogram(String filePath) {
+    histogram = FileOperations.readHistogram(filePath);
     buckets = histogram.size();
     for (Bucket bucket : histogram) {
       maxInput += bucket.getCount();
     }
     average = maxInput / buckets;
     sorted = true;
+    lowerBound = 1.0 / buckets;
   }
 
   /**
    * Write histogram to file with function of ComHistUtil class.
    */
-  public void writeHist() {
-    FileOperations.writeHistogram(histogram, histFile);
+  public void writeHistogram(String filePath) {
+    FileOperations.writeHistogram(histogram, filePath);
   }
 
   /**
@@ -85,13 +92,10 @@ public class CompressedHistogram implements Histogram {
       return;
     }
     if (!sorted) {
-      CompareBuckets cb = new CompareBuckets();
       Collections.sort(histogram, cb);
     }
     if ( histogram.size() == buckets) {
-      // sort list of buckets
       if (!sorted) {
-        CompareBuckets cb = new CompareBuckets();
         Collections.sort(histogram, cb);
         sorted = true;
       }
@@ -113,7 +117,7 @@ public class CompressedHistogram implements Histogram {
       average = maxInput / buckets;
       
       // check chiSquare if true then repartition histogram
-      if (chiSquare() > lbound) {
+      if (chiSquare() > lowerBound) {
         repartition();
       }
     }
