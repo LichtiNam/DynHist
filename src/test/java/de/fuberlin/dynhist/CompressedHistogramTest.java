@@ -20,7 +20,7 @@ public class CompressedHistogramTest {
   public void setUp() {
     input = new double[]{1.4,1.5,1.2,1.2,2.2,4.1,5.5,3.6,2.7,2.8,6,7.2};
     buckets = 6;
-    histogram = new CompressedHistogram(buckets, false);
+    histogram = new CompressedHistogram(buckets);
   }
 
   @Test
@@ -29,7 +29,7 @@ public class CompressedHistogramTest {
       histogram.addInput(d);
     }
 
-    List<Bucket> hist = (List<Bucket>) histogram.getHistogram();
+    List<Bucket> hist = histogram.getHistogram();
     assertEquals(1.2, hist.get(0).getLeftBorder(), 0.1);
     assertEquals(1.4, hist.get(1).getLeftBorder(), 0.1);
     assertEquals(1.6, hist.get(2).getLeftBorder(), 0.1);
