@@ -27,12 +27,6 @@ public interface Histogram {
   public void writeHistogram(String filePath);
 
   /**
-   * Read histogram from filePath.
-   * @param filePath
-   */
-  public void readHistogram(String filePath);
-
-  /**
    * Returns the number of buckets.
    */
   public int getBuckets();

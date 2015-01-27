@@ -21,8 +21,7 @@ public class CompressedHistogram implements Histogram {
   private CompareBuckets cb;
 
   /**
-   * Contractor of DynComHist use buckets of readFile is false
-   * histFile use the first String parameter, parameter can be empty then default is used.
+   * Constructor of CompressedHistogram with # of buckets as input.
    */
   public CompressedHistogram(int buckets) {
     this.buckets = buckets;
@@ -32,19 +31,13 @@ public class CompressedHistogram implements Histogram {
   }
 
   /**
-   * Returns number of buckets
+   * Constructor of CompressedHistogram with filePath to read a histogram from file.
+   *
    */
-  public int getBuckets() {
-    return buckets;
-  }
-
-  /**
-   * Read histogram from filePath
-   * @param filePath
-   */
-  public void readHistogram(String filePath) {
+  public CompressedHistogram(String filePath) {
     initHistogram(filePath);
   }
+
 
   private void initHistogram(String filePath) {
     histogram = FileOperations.readHistogram(filePath);
@@ -55,6 +48,13 @@ public class CompressedHistogram implements Histogram {
     average = maxInput / buckets;
     sorted = true;
     lowerBound = 1.0 / buckets;
+  }
+
+  /**
+   * Returns number of buckets.
+   */
+  public int getBuckets() {
+    return buckets;
   }
 
   /**
