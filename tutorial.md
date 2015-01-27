@@ -18,12 +18,9 @@ for (Bucket bucket : hist) {
 #### Read / Write
 
 ```
-int buckets = 40;
 String filePath "histogram.dat";
 
-Histogram histogram = new Histigram(buckets);
-// read histogram
-histogram.readHistogram(filePath);
+Histogram histogram = new Histigram(filePath);
 
 System.out.println("Buckets of readed histogram: "+ histogram.getBuckets);
 
