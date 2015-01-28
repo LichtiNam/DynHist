@@ -1,5 +1,6 @@
 package de.fuberlin.dynhist;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,12 +35,12 @@ public class CompressedHistogram implements Histogram {
    * Constructor of CompressedHistogram with filePath to read a histogram from file.
    *
    */
-  public CompressedHistogram(String filePath) {
+  public CompressedHistogram(String filePath) throws Exception {
     initHistogram(filePath);
   }
 
 
-  private void initHistogram(String filePath) {
+  private void initHistogram(String filePath) throws Exception {
     histogram = FileOperations.readHistogram(filePath);
     buckets = histogram.size();
     for (Bucket bucket : histogram) {
@@ -60,7 +61,7 @@ public class CompressedHistogram implements Histogram {
   /**
    * Write histogram to file with function of ComHistUtil class.
    */
-  public void writeHistogram(String filePath) {
+  public void writeHistogram(String filePath) throws IOException {
     FileOperations.writeHistogram(histogram, filePath);
   }
 
