@@ -20,7 +20,7 @@ public class FileOperations {
    * Read histogram from file, need the same information like the write method
    * @return histogram as list of buckets
    */
-  public static List<Bucket> readHistogram(String filename) {
+  public static List<Bucket> readHistogram(String filename) throws Exception {
     List<Bucket> histogram = null;
     try {
       File file = new File(filename);
@@ -31,12 +31,8 @@ public class FileOperations {
         ois.close();
         fis.close();
       }
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
+    } catch (Exception e) {
+      throw new Exception(e.toString());
     }
     return histogram;
   }
@@ -46,7 +42,7 @@ public class FileOperations {
    * Buckets in list have to serializable.
    * @param histogram
    */
-  public static void writeHistogram(List<Bucket> histogram, String filename) {
+  public static void writeHistogram(List<Bucket> histogram, String filename) throws IOException {
     try {
       FileOutputStream fos = new FileOutputStream(filename);
       ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -54,7 +50,7 @@ public class FileOperations {
       oos.close();
       fos.close();
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new IOException(e);
     }
   }
 }

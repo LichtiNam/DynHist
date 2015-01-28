@@ -1,5 +1,6 @@
 package de.fuberlin.dynhist;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -24,7 +25,7 @@ public interface Histogram {
    * Write histogram if to filePath.
    * @param filePath
    */
-  public void writeHistogram(String filePath);
+  public void writeHistogram(String filePath) throws IOException;
 
   /**
    * Returns the number of buckets.
