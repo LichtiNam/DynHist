@@ -20,7 +20,7 @@ public class CompressedHistogramTest {
   public void setUp() {
     input = new double[]{1.4,1.5,1.2,1.2,2.2,4.1,5.5,3.6,2.7,2.8,6,7.2};
     buckets = 6;
-    histogram = new CompressedHistogram(buckets);
+    histogram = new CompressedHistogram(buckets, 1);
   }
 
   @Test
