@@ -13,6 +13,7 @@ import java.util.List;
 public class CompressedHistogram implements Histogram {
 
   private int buckets;
+  private int partition;
   private List<Bucket> histogram;
   private boolean sorted = false;
   private double maxInput = 0;
@@ -24,8 +25,9 @@ public class CompressedHistogram implements Histogram {
   /**
    * Constructor of CompressedHistogram with # of buckets as input.
    */
-  public CompressedHistogram(int buckets) {
+  public CompressedHistogram(int buckets, int partition) {
     this.buckets = buckets;
+    this.partition = partition;
     cb = new CompareBuckets();
     histogram = new ArrayList<>();
     lowerBound = 1.0 / this.buckets;
@@ -118,8 +120,10 @@ public class CompressedHistogram implements Histogram {
       average = maxInput / buckets;
       
       // check chiSquare if true then repartition histogram
-      if (chiSquare() > lowerBound) {
-        repartition();
+      if (maxInput % partition == 0) {
+        if (chiSquare() > lowerBound) {
+          repartition();
+        }
       }
     }
   }
