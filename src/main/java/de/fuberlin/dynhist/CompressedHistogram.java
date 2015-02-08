@@ -137,7 +137,7 @@ public class CompressedHistogram implements Histogram {
     return chi;
   }
 
-  private void repartition() {
+  public void repartition() {
     double currentBorder = histogram.get(0).getLeftBorder();
     int intAverage = (int) average;
     double nextBorder;

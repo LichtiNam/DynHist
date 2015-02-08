@@ -31,4 +31,6 @@ public interface Histogram {
    * Returns the number of buckets.
    */
   public int getBuckets();
+
+  public void repartition();
 }
