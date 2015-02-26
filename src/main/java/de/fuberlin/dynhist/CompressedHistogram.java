@@ -1,158 +1,37 @@
 package de.fuberlin.dynhist;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * @author Martin Görick
  *
- * Implementation of a dynamic compressed histogram
+ * Interface to operate with histograms
  */
-public class CompressedHistogram implements Histogram {
-
-  private int buckets;
-  private int partition;
-  private List<Bucket> histogram;
-  private boolean sorted = false;
-  private double maxInput = 0;
-  private double lowerBound;      // lower bound for chiSquare check, 1.0 / # buckets
-  private double average = 0;     // maxInput / buckets
-
-  private CompareBuckets cb;
+public interface CompressedHistogram {
 
   /**
-   * Constructor of CompressedHistogram with # of buckets as input.
+   * Add a double value to the histogram.
    */
-  public CompressedHistogram(int buckets, int partition) {
-    this.buckets = buckets;
-    this.partition = partition;
-    cb = new CompareBuckets();
-    histogram = new ArrayList<>();
-    lowerBound = 1.0 / this.buckets;
-  }
+  public void addValue(double value);
 
   /**
-   * Constructor of CompressedHistogram with filePath to read a histogram from file.
-   *
+   * Returns the list of buckets as histogram.
    */
-  public CompressedHistogram(String filePath) throws Exception {
-    initHistogram(filePath);
-  }
-
-
-  private void initHistogram(String filePath) throws Exception {
-    histogram = FileOperations.readHistogram(filePath);
-    buckets = histogram.size();
-    for (Bucket bucket : histogram) {
-      maxInput += bucket.getCount();
-    }
-    average = maxInput / buckets;
-    sorted = true;
-    lowerBound = 1.0 / buckets;
-  }
+  public List<Bucket> getHistogram();
 
   /**
-   * Returns number of buckets.
+   * Write histogram to the filePath.
    */
-  public int getBuckets() {
-    return buckets;
-  }
+  public void writeHistogram(String filePath) throws IOException;
 
   /**
-   * Write histogram to file with function of ComHistUtil class.
+   * Returns the number of buckets.
    */
-  public void writeHistogram(String filePath) throws IOException {
-    FileOperations.writeHistogram(histogram, filePath);
-  }
+  public int getBuckets();
 
   /**
-   * Returns histogram as a list of buckets.
+   * manually use of repartition
    */
-  public List<Bucket> getHistogram() {
-    return histogram;
-  }
-
-  /**
-   * Add an double value to histogram. Create extra bucket till no bucket are empty.
-   * check the chiSquare if all buckets filled and repartition the histogram.
-   * @param input a double value
-   */
-  public void addInput(double input) {
-    maxInput++;
-    average = maxInput / buckets;
-    int histSize = histogram.size();
-    if (histSize < buckets) {
-      for (Bucket bucket : histogram) {
-        if (bucket.getLeftBorder() == input) {
-          bucket.incCount();
-          return;
-        }
-      }
-      Bucket bucket = new Bucket(input);
-      histogram.add(bucket);
-      return;
-    }
-    if (!sorted) {
-      Collections.sort(histogram, cb);
-    }
-    if ( histogram.size() == buckets) {
-      if (!sorted) {
-        Collections.sort(histogram, cb);
-        sorted = true;
-      }
-      for (int idx = 0; idx < buckets; idx++) {
-        if (histogram.get(idx).getLeftBorder() > input) {
-          if (idx == 0) {
-            histogram.get(0).incCount();
-            histogram.get(0).setLeftBorder(input);
-            break;
-          } else {
-            histogram.get(idx - 1).incCount();
-            break;
-          }
-        }
-        if (idx == buckets - 1 && histogram.get(idx).getLeftBorder() <= input) {
-          histogram.get(idx).incCount();
-        }
-      }
-      average = maxInput / buckets;
-      
-      // check chiSquare if true then repartition histogram
-      if (maxInput % partition == 0) {
-        if (chiSquare() > lowerBound) {
-          repartition();
-        }
-      }
-    }
-  }
-
-  private double chiSquare() {
-    double chi = 0;
-    for (Bucket bucket : histogram) {
-      chi += ((bucket.getCount() - average) * (bucket.getCount() - average))
-          / average;
-    }
-    return chi;
-  }
-
-  public void repartition() {
-    double currentBorder = histogram.get(0).getLeftBorder();
-    int intAverage = (int) average;
-    double nextBorder;
-    double range;
-    double newRightBorder;
-    for (int idx = 0; idx < buckets - 1; idx++) {
-      nextBorder = histogram.get(idx + 1).getLeftBorder();
-      range = nextBorder - currentBorder;
-      newRightBorder = (range / histogram.get(idx).getCount()) * intAverage;
-      currentBorder = histogram.get(idx + 1).getLeftBorder();
-      histogram.get(idx + 1).setLeftBorder(histogram.get(idx).getLeftBorder()
-          + newRightBorder);
-      histogram.get(idx).setCount(intAverage);
-    }
-    histogram.get(buckets - 1).setCount((int) maxInput
-        - (intAverage * (buckets - 1)));
-  }
+  public void repartition();
 }
