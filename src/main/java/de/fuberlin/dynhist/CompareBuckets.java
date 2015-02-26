@@ -9,6 +9,9 @@ import java.util.Comparator;
  */
 public class CompareBuckets implements Comparator<Bucket> {
 
+  /**
+   * Return the test of the borders of two buckets.
+   */
   public int compare(Bucket bucket1, Bucket bucket2) {
     if (bucket1.getLeftBorder() > bucket2.getLeftBorder()) {
       return 1;
