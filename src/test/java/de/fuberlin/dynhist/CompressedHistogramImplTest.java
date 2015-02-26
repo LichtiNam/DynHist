@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Created by Martin Görick
  */
-public class CompressedHistogramTest {
+public class CompressedHistogramImplTest {
 
   private double[] input;
   private int buckets;

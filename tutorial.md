@@ -5,7 +5,7 @@
 ```
 int buckets = 40;
 
-Histogram histogram = new Histogram(buckets);
+CompressedHistogram histogram = new CompressedHistogramImpl(buckets);
 histogram.addInput(value);
 List<Bucket> hist = histogram.getHistogram();
 
@@ -20,7 +20,7 @@ for (Bucket bucket : hist) {
 ```
 String filePath "histogram.dat";
 
-Histogram histogram = new Histigram(filePath);
+CompressedHistogram histogram = new CompressedHistigramImpl(filePath);
 
 System.out.println("Buckets of readed histogram: "+ histogram.getBuckets);
 
