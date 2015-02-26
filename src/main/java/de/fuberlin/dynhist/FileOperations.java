@@ -40,7 +40,6 @@ public class FileOperations {
   /**
    * Write histogram to a file.
    * Buckets in list have to serializable.
-   * @param histogram
    */
   public static void writeHistogram(List<Bucket> histogram, String filename) throws IOException {
     try {
