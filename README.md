@@ -14,7 +14,7 @@ import the `dynhist-<version>.jar` file in your program.
 To work with the histogram:
 
 ```
-CompressedHistogram histogram = new CompressedHistogramImpl(buckets, false);
+CompressedHistogram histogram = new CompressedHistogramImpl(buckets);
 
 histogram.addInput(Doublevalue);
 ```
