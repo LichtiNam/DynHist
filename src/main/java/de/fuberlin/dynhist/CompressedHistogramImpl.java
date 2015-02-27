@@ -13,11 +13,10 @@ import java.util.List;
 public class CompressedHistogramImpl implements CompressedHistogram {
 
   private int buckets;
-  private int partition;
   private List<Bucket> histogram;
   private boolean sorted = false;
   private double maxInput = 0;
-  private double lowerBound;      // lower bound for chiSquare check, 1.0 / # buckets
+  private double alpha = 0.0001;
   private double average = 0;     // maxInput / buckets
 
   private CompareBuckets cb;
@@ -25,12 +24,10 @@ public class CompressedHistogramImpl implements CompressedHistogram {
   /**
    * Constructor of CompressedHistogram with # of buckets as input.
    */
-  public CompressedHistogramImpl(int buckets, int partition) {
+  public CompressedHistogramImpl(int buckets) {
     this.buckets = buckets;
-    this.partition = partition;
     cb = new CompareBuckets();
     histogram = new ArrayList<>();
-    lowerBound = 1.0 / this.buckets;
   }
 
   /**
@@ -50,7 +47,6 @@ public class CompressedHistogramImpl implements CompressedHistogram {
     }
     average = maxInput / buckets;
     sorted = true;
-    lowerBound = 1.0 / buckets;
   }
 
   /**
@@ -115,11 +111,8 @@ public class CompressedHistogramImpl implements CompressedHistogram {
       }
       average = maxInput / buckets;
 
-      // check chiSquare if true then repartition histogram
-      if (maxInput % partition == 0) {
-        if (chiSquare() > lowerBound) {
-          repartition();
-        }
+      if (MathUtil.chiSquareProb(2,chiSquare()) < alpha) {
+        repartition();
       }
     }
   }
@@ -142,24 +135,26 @@ public class CompressedHistogramImpl implements CompressedHistogram {
     double nextBorder;
     double range;
     double newRightBorder;
+    double rest = 0;
+    int set;
+    int setAll = 0;
     for (int idx = 0; idx < buckets - 1; idx++) {
+      rest += average - intAverage;
+      if (rest - (int) rest > 0.5) {
+        set = intAverage + 1;
+      } else {
+        set = intAverage;
+      }
+      setAll += set;
       nextBorder = histogram.get(idx + 1).getLeftBorder();
       range = nextBorder - currentBorder;
-      newRightBorder = (range / histogram.get(idx).getCount()) * intAverage;
+      newRightBorder = (range / histogram.get(idx).getCount()) * set;
       currentBorder = histogram.get(idx + 1).getLeftBorder();
       histogram.get(idx + 1).setLeftBorder(histogram.get(idx).getLeftBorder()
-              + newRightBorder);
-      if (idx % 2 == 0 && (average - (int) average) >= 0.5 ) {
-        histogram.get(idx).setCount(intAverage + 1);
-      } else {
-        histogram.get(idx).setCount(intAverage);
-      }
+          + newRightBorder);
+      histogram.get(idx).setCount(set);
     }
 
-    int count = 0;
-    for (int idx = 0; idx < buckets - 1; idx++) {
-      count += histogram.get(idx).getCount();
-    }
-    histogram.get(buckets - 1).setCount((int) maxInput - count);
+    histogram.get(buckets - 1).setCount((int) maxInput - setAll);
   }
 }
